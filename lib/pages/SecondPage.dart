@@ -20,7 +20,7 @@ class _SecondPageState extends State<SecondPage> {
 
   List<String> childList = [];
 
-  void _getNameList() async { // async 나빠
+  void _getNameList() async {
     List<String> nameList = await DB.instance.getParentsKidsName();
     childList += nameList;
     setState(() {});
@@ -47,19 +47,6 @@ class _SecondPageState extends State<SecondPage> {
                 Text('KIKEE',style: TextStyle(fontFamily: 'BMJUA',fontSize: 70,color: Colors.orange) ,),
                 Image.asset('image/KIKI.png',height: 57,),
               ],
-            ),
-            Container(
-              height: 270 ,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: childList.length, //슬라이드 카드 정보 리스트
-                itemBuilder: (BuildContext context, int index) => GestureDetector(
-                  child: childCard(childList[index]),
-                  onTap: (){
-                    selectIdx = index;
-                  },
-                ),
-              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -174,6 +161,19 @@ class _SecondPageState extends State<SecondPage> {
                   ],
                 ),
               ],
+            ),
+            Container(
+              height: 270 ,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: childList.length, //슬라이드 카드 정보 리스트
+                itemBuilder: (BuildContext context, int index) => GestureDetector(
+                  child: childCard(childList[index]),
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(), settings: RouteSettings(arguments: "$index"),));
+                  },
+                ),
+              ),
             ),
           ],
         ),

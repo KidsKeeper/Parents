@@ -22,6 +22,8 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    var test = ModalRoute.of(context).settings.arguments;
+    print("자녀: "+test);
     return Scaffold(
       body: Stack(
         children: <Widget>[
