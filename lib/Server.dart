@@ -12,7 +12,7 @@ parentsIdCompare(parentsId) async {
 
   print('parentsId comparing');
 
-  const String URL = 'http://10.0.2.2:8088/parents/id/compare';
+  const String URL = 'http://3.34.194.177:8088/parents/id/compare';
 
   try {
     final response = await http.post(

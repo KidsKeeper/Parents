@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './pages/FirstPage.dart';
+import 'pages/ThirdPage.dart';
 
 void main() => runApp(KidsKeeper());
 
