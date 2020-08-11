@@ -6,6 +6,7 @@ import 'dart:ui';
 import '../ChildCard.dart';
 import '../db/DB.dart';
 import './DBpage.dart';
+import 'ThirdPage.dart';
 // import './ThirdPage.dart';
 
 class SecondPage extends StatefulWidget {
@@ -167,7 +168,7 @@ class _SecondPageState extends State<SecondPage> {
                       onTap: ()
                       {
                         // Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage()));
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => DBpage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage()));
                       },
                     ),
                   ],
