@@ -31,7 +31,7 @@ parentsIdCompare(parentsId) async {
 
 parentsKeyConfirm( parentsId, String name, String key ) async {
   var result;
-  const String URL = 'http://10.0.2.2:8088/parents/key/confirm';
+  const String URL = 'http://3.34.194.177:8088/parents/key/confirm';
   Map data = { 'parentsId': parentsId, 'name': name, 'key': key };
 
   print('chekcing the key');
@@ -44,6 +44,30 @@ parentsKeyConfirm( parentsId, String name, String key ) async {
     );
 
     result = response.body;
+  }
+
+  catch (e) { print(e); }
+
+  return result;
+}
+
+kidsLocationGet( int kidsId ) async {
+  var result;
+
+  const String URL = 'http://3.34.194.177:8088/parents/location/get';
+  Map data = { 'kidsId': kidsId };
+
+  print('getting kids location');
+
+  try {
+    final response = await http.post(
+        Uri.encodeFull(URL),
+        headers: headers,
+        body: jsonEncode(data)
+    );
+
+    result = json.decode(response.body)['data'][0];
+//    result = response.body;
   }
 
   catch (e) { print(e); }

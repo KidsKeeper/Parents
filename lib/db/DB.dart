@@ -108,6 +108,13 @@ class DB {
     return nameList;
   }
 
+  Future<int> getParentsKidsId( int index ) async {
+    final Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('parentskids');
+
+    return maps[index]['kidsId'];
+  }
+
   Future<List<Parents>> getParents() async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query( 'parents', orderBy: 'id DESC' );

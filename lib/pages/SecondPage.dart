@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import '../ChildCard.dart';
 import '../db/DB.dart';
+import '../Server.dart';
 import './DBpage.dart';
 import 'ThirdPage.dart';
 // import './ThirdPage.dart';
@@ -154,8 +155,7 @@ class _SecondPageState extends State<SecondPage> {
                       ),
                       onTap: ()
                       {
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage()));
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage()));
+                         Navigator.push(context, MaterialPageRoute(builder: (context) => DBpage()));
                       },
                     ),
                   ],
@@ -169,8 +169,10 @@ class _SecondPageState extends State<SecondPage> {
                 itemCount: childList.length, //슬라이드 카드 정보 리스트
                 itemBuilder: (BuildContext context, int index) => GestureDetector(
                   child: childCard(childList[index]),
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(), settings: RouteSettings(arguments: "$index"),));
+                  onTap: () async {
+                    int kidsId = await DB.instance.getParentsKidsId(index);
+                    var data = await kidsLocationGet(kidsId);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(), settings: RouteSettings(arguments: data),));
                   },
                 ),
               ),
