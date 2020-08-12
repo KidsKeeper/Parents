@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import '../Server.dart';
+// import '../Server.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -26,7 +25,6 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-//    var data = json.decode( ModalRoute.of(context).settings.arguments )['data'];
     Map<String, dynamic> data = ModalRoute.of(context).settings.arguments;
     tempList.add(data['polygon']);
     for(int i=0; i<tempList[0].length; i++) {

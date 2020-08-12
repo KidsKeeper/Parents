@@ -2,6 +2,8 @@ import 'package:http/http.dart' as http;
 
 import 'dart:convert';
 
+import './db/DB.dart';
+
 Map <String, String> headers = {
   'Content-type': 'application/json',
   'Accpet': 'application/json',
@@ -67,7 +69,7 @@ kidsLocationGet( int kidsId ) async {
     );
 
     result = json.decode(response.body)['data'][0];
-//    result = response.body;
+    DB.instance.insertKidsLocation(result); // 내부 DB에 kids location 저장.
   }
 
   catch (e) { print(e); }

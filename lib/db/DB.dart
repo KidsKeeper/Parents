@@ -5,13 +5,14 @@ import 'dart:convert';
 
 import '../models/Parents.dart';
 import '../models/ParentsKids.dart';
+import '../models/KidsLocation.dart';
 import '../Helper.dart';
 import '../Server.dart';
 
 class DB {
   DB._();
 
-  static const _databaseName = 'kikee_parents.db';
+  static const _databaseName = 'kikeee_parents.db';
 
   static final DB instance = DB._();
 
@@ -29,6 +30,7 @@ class DB {
       onCreate: ( Database db, int version ) async {
         await db.execute( "CREATE TABLE parents (id INTEGER PRIMARY KEY NOT NULL, parentsId INTEGER)" );
         await db.execute( "CREATE TABLE parentskids (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, name TEXT, key TEXT)" );
+        await db.execute( "CREATE TABLE kidslocation (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, source TEXT, destination TEXT, polygon TEXT, start TEXT, end TEXT, date TEXT)" );
       }
     );
   }
@@ -97,6 +99,55 @@ class DB {
     catch (e) { parentsId = -1; print('no parentsId'); }
 
     return parentsId;
+  }
+
+  Future<List<KidsLocation>> getKidsLocation() async {
+    final Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('kidslocation');
+
+    return List.generate(maps.length, (i) {
+      return KidsLocation(
+          id: maps[i]['id'],
+          start: maps[i]['start'],
+          end: maps[i]['end'],
+          polygon: maps[i]['polygon'],
+          source: maps[i]['source'],
+          destination: maps[i]['destination'],
+          date: maps[i]['date']
+      );
+    });
+  }
+
+  Future<void> insertKidsLocation( Map<String, dynamic> data) async {
+    final Database db = await database;
+
+    try {
+      List<dynamic> start = data['start'];
+      List<dynamic> end = data['end'];
+      List<dynamic> polygon = data['polygon'];
+
+      String startString = start[0].toString() + ',' + start[1].toString();
+      String endString = end[0].toString() + ',' + end[1].toString();
+
+      String polygonString = '';
+
+      for( int i = 0; i < polygon.length; i++ ) // sqlite의 한계로 array가 아닌 string으로 저장해야하므로 polygon안의 데이터들을 따로 뗴서 string으로 저장하는 과정.
+        polygonString += polygon[i][0].toString() + "," + polygon[i][1].toString() + ",";
+
+      polygonString = polygonString.substring( 0, polygonString.length - 1 ); // 맨 마지막 콤마(,)를 지우는 과정.
+
+      KidsLocation kidsLocation = KidsLocation(
+        kidsId: data['kidsId'],
+        start: startString,
+        end: endString,
+        polygon: polygonString,
+        date: data['date']
+      );
+
+      await db.insert( 'kidslocation', kidsLocation.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
+    }
+
+    catch (e) { print('1'); print(e); }
   }
 
   getParentsKidsName() async {
