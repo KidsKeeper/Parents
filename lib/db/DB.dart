@@ -104,7 +104,7 @@ class DB {
   Future<List<KidsLocation>> getKidsLocation() async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('kidslocation');
-
+   
     return List.generate(maps.length, (i) {
       return KidsLocation(
           id: maps[i]['id'],
