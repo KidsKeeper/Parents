@@ -105,17 +105,22 @@ class DB {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('kidslocation');
 
-    return List.generate(maps.length, (i) {
-      return KidsLocation(
-          id: maps[i]['id'],
-          start: maps[i]['start'],
-          end: maps[i]['end'],
-          polygon: maps[i]['polygon'],
-          source: maps[i]['source'],
-          destination: maps[i]['destination'],
-          date: maps[i]['date']
-      );
-    });
+//    try{
+      return List.generate(maps.length, (i) {
+        return KidsLocation(
+            id: maps[i]['id'],
+            start: maps[i]['start'],
+            end: maps[i]['end'],
+            polygon: maps[i]['polygon'],
+            source: maps[i]['source'],
+            destination: maps[i]['destination'],
+            date: maps[i]['date']
+        );
+      });
+//    }catch(e){
+//      print(e);
+//    }
+
   }
 
   Future<void> insertKidsLocation( Map<String, dynamic> data) async {
