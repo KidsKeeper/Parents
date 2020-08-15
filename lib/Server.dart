@@ -52,26 +52,49 @@ parentsKeyConfirm( parentsId, String name, String key ) async {
   return result;
 }
 
-kidsLocationGet( int kidsId ) async {
+kidsLocationGet( int number, int kidsId ) async {
   var result;
+  int parentsId = DB.instance.getParentsId();
 
-  const String URL = 'http://3.34.194.177:8088/parents/location/get';
-  Map data = { 'kidsId': kidsId };
+  Map data = { 'kidsId': kidsId, 'parentsId': parentsId };
 
-  print('getting kids location');
+  String url;
 
-  try {
-    final response = await http.post(
-        Uri.encodeFull(URL),
+  if( number == 0 ) { // get location
+    print('getting kids location');
+    url = 'http://3.34.194.177:8088/parents/location/get';
+
+    try {
+      final response = await http.post(
+        Uri.encodeFull(url),
         headers: headers,
         body: jsonEncode(data)
     );
 
-    result = json.decode(response.body)['data'][0];
-    DB.instance.insertKidsLocation(result); // 내부 DB에 kids location 저장.
+      result = json.decode(response.body)['data'][0];
+      
+    }
+
+    catch (e) { print(e); }
+
+    return result;
   }
 
-  catch (e) { print(e); }
+  else if( number == 1) { // get polygon
+    print('getting kids polygon');
+    url = 'http://3.34.194.177:8088/parents/polygon/get';
 
-  return result;
+    try {
+      final response = await http.post(
+        Uri.encodeFull(url),
+        headers: headers,
+        body: jsonEncode(data)
+    );
+
+      result = json.decode(response.body)['data'][0];
+      DB.instance.insertKidsPolygon(result); // 내부 DB에 kids polygon 저장.
+    }
+
+    catch (e) { print(e); }
+  }
 }

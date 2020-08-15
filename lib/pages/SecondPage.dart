@@ -171,8 +171,10 @@ class _SecondPageState extends State<SecondPage> {
                   child: childCard(childList[index]),
                   onTap: () async {
                     int kidsId = await DB.instance.getParentsKidsId(index);
-                    var data = await kidsLocationGet(kidsId);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(), settings: RouteSettings(arguments: data),));
+                    var nowLocation = await kidsLocationGet( 0, kidsId );
+                    await kidsLocationGet( 1, kidsId );
+                    // print(nowLocation);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(), settings: RouteSettings(arguments: nowLocation),));
                   },
                 ),
               ),
