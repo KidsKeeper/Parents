@@ -173,7 +173,7 @@ class _SecondPageState extends State<SecondPage> {
                     int kidsId = await DB.instance.getParentsKidsId(index);
                     var nowLocation = await kidsLocationGet( 0, kidsId );
                     await kidsLocationGet( 1, kidsId );
-                    // print(nowLocation);
+                     print(nowLocation);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(), settings: RouteSettings(arguments: nowLocation),));
                   },
                 ),

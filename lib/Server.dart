@@ -35,7 +35,7 @@ parentsKeyConfirm( parentsId, String name, String key ) async {
   const String URL = 'http://3.34.194.177:8088/parents/key/confirm';
   Map data = { 'parentsId': parentsId, 'name': name, 'key': key };
 
-  print('chekcing the key');
+  print('Server: chekcing the key');
 
   try {
     final response = await http.post(
@@ -54,14 +54,14 @@ parentsKeyConfirm( parentsId, String name, String key ) async {
 
 kidsLocationGet( int number, int kidsId ) async {
   var result;
-  int parentsId = DB.instance.getParentsId();
+  var parentsId = await DB.instance.getParentsId();
 
   Map data = { 'kidsId': kidsId, 'parentsId': parentsId };
 
   String url;
 
   if( number == 0 ) { // get location
-    print('getting kids location');
+    print('Server: getting kids location');
     url = 'http://3.34.194.177:8088/parents/location/get';
 
     try {
@@ -81,7 +81,7 @@ kidsLocationGet( int number, int kidsId ) async {
   }
 
   else if( number == 1) { // get polygon
-    print('getting kids polygon');
+    print('Server: getting kids polygon');
     url = 'http://3.34.194.177:8088/parents/polygon/get';
 
     try {
