@@ -13,7 +13,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   Completer<GoogleMapController> _mapController = Completer();
 
-  Set<Marker> markers = {};
+  Set<Marker> _markers = {};
   Set<Polyline> polylines = {};
 
   List<LatLng> points =[];
@@ -30,30 +30,37 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     Map<String, dynamic> data = ModalRoute.of(context).settings.arguments;
 
-    tempList.add(data['polygon']);
+    _markers.add(Marker(
+      markerId: MarkerId( _markers.length.toString() ),
+      position: LatLng( data['lat'], data['lon'] ),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+    ));
+
+    // print(data);
+    // tempList.add(data['polygon']);
     // timeList.add(data['date']);
 
-    for(int i=0; i<tempList[0].length; i++) {
-      points.add(LatLng(tempList[0][i][0], tempList[0][i][1]));
-    }
+    // for(int i=0; i<tempList[0].length; i++) {
+    //   points.add(LatLng(tempList[0][i][0], tempList[0][i][1]));
+    // }
 
-    markers.add(Marker(
-      markerId: MarkerId(markers.length.toString()),
-      position: LatLng(data['start'][0],data['start'][1]),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-    ));
+    // markers.add(Marker(
+    //   markerId: MarkerId(markers.length.toString()),
+    //   position: LatLng(data['start'][0],data['start'][1]),
+    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+    // ));
 
-    markers.add(Marker(
-      markerId: MarkerId(markers.length.toString()),
-      position: LatLng(data['end'][0],data['end'][1]),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-    ));
+    // markers.add(Marker(
+    //   markerId: MarkerId(markers.length.toString()),
+    //   position: LatLng(data['end'][0],data['end'][1]),
+    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+    // ));
 
-    polylines.add(Polyline(
-      polylineId: PolylineId(polylines.length.toString()),
-      points:points,
-      color:Colors.blue,
-    ));
+    // polylines.add(Polyline(
+    //   polylineId: PolylineId(polylines.length.toString()),
+    //   points:points,
+    //   color:Colors.blue,
+    // ));
 
     return Scaffold(
       body: Stack(
@@ -65,7 +72,7 @@ class _MapPageState extends State<MapPage> {
               zoom: 15.0,
             ),
             zoomControlsEnabled: false,
-            markers: markers,
+            markers: _markers,
             polylines: polylines,
             onMapCreated: (GoogleMapController controller) {
               _mapController.complete(controller);
@@ -85,7 +92,7 @@ class _MapPageState extends State<MapPage> {
   Widget _scrollingList(ScrollController sc, context) {
 
     return FutureBuilder(
-      future: DB.instance.getKidsLocation(),
+      future: DB.instance.getKidsPolygon(),
       // ignore: missing_return
       builder: (context, snapshot) {
         if( snapshot.hasData ) {

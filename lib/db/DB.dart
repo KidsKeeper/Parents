@@ -5,14 +5,14 @@ import 'dart:convert';
 
 import '../models/Parents.dart';
 import '../models/ParentsKids.dart';
-import '../models/KidsLocation.dart';
+import '../models/KidsPolygon.dart';
 import '../Helper.dart';
 import '../Server.dart';
 
 class DB {
   DB._();
 
-  static const _databaseName = 'kikeee_parents.db';
+  static const _databaseName = 'kike_parents.db';
 
   static final DB instance = DB._();
 
@@ -30,14 +30,14 @@ class DB {
       onCreate: ( Database db, int version ) async {
         await db.execute( "CREATE TABLE parents (id INTEGER PRIMARY KEY NOT NULL, parentsId INTEGER)" );
         await db.execute( "CREATE TABLE parentskids (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, name TEXT, key TEXT)" );
-        await db.execute( "CREATE TABLE kidslocation (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, source TEXT, destination TEXT, polygon TEXT, start TEXT, end TEXT, date TEXT)" );
+        await db.execute( "CREATE TABLE kidspolygon (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, source TEXT, destination TEXT, polygon TEXT, start TEXT, end TEXT, date TEXT)" );
       }
     );
   }
 
   insertParentsId( String name, String key ) async {
     final Database db = await database;
-    var parentsId = await _getParentsId(); // parentsId가 있는지 확인
+    var parentsId = await getParentsId(); // parentsId가 있는지 확인
 
     if( parentsId != -1 ) {
       _insertParentsKey( db, parentsId, name, key ); // 전에 parentsId 생성했더라면
@@ -87,7 +87,7 @@ class DB {
     catch (e) { print(e); }
   }
 
-  _getParentsId()  async {
+  getParentsId()  async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('parents');
     int parentsId;
@@ -101,12 +101,12 @@ class DB {
     return parentsId;
   }
 
-  Future<List<KidsLocation>> getKidsLocation() async {
+  Future<List<KidsPolygon>> getKidsPolygon() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('kidslocation');
+    final List<Map<String, dynamic>> maps = await db.query('kidspolygon');
    
     return List.generate(maps.length, (i) {
-      return KidsLocation(
+      return KidsPolygon(
           id: maps[i]['id'],
           start: maps[i]['start'],
           end: maps[i]['end'],
@@ -118,7 +118,7 @@ class DB {
     });
   }
 
-  Future<void> insertKidsLocation( Map<String, dynamic> data) async {
+  Future<void> insertKidsPolygon( Map<String, dynamic> data) async {
     final Database db = await database;
 
     try {
@@ -136,7 +136,7 @@ class DB {
 
       polygonString = polygonString.substring( 0, polygonString.length - 1 ); // 맨 마지막 콤마(,)를 지우는 과정.
 
-      KidsLocation kidsLocation = KidsLocation(
+      KidsPolygon kidsPolygon = KidsPolygon(
         kidsId: data['kidsId'],
         start: startString,
         end: endString,
@@ -144,7 +144,7 @@ class DB {
         date: data['date']
       );
 
-      await db.insert( 'kidslocation', kidsLocation.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
+      await db.insert( 'kidspolygon', kidsPolygon.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
     }
 
     catch (e) { print('1'); print(e); }

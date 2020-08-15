@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../db/DB.dart';
 // import '../models/Parents.dart';
 // import '../models/ParentsKids.dart';
-import '../models/KidsLocation.dart';
+import '../models/KidsPolygon.dart';
 
 class DBpage extends StatefulWidget {
   @override
@@ -17,10 +17,10 @@ class _DBpageState extends State<DBpage> {
       appBar: AppBar( title: Text('디비 목록 결과') ),
       // body: FutureBuilder<List<Parents>>(
       // body: FutureBuilder<List<ParentsKids>>(
-      body: FutureBuilder<List<KidsLocation>>(
+      body: FutureBuilder<List<KidsPolygon>>(
         // future: DB.instance.getParents(),
         // future: DB.instance.getParentsKids(),
-        future: DB.instance.getKidsLocation(),
+        future: DB.instance.getKidsPolygon(),
         builder: (context, snapshot) {
           if( snapshot.hasData ) {
             return ListView.builder(
