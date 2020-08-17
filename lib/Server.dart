@@ -59,7 +59,6 @@ kidsLocationGet( int number, int kidsId ) async {
   Map data = { 'kidsId': kidsId, 'parentsId': parentsId };
 
   String url;
-
   if( number == 0 ) { // get location
     print('Server: getting kids location');
     url = 'http://3.34.194.177:8088/parents/location/get';
@@ -69,12 +68,10 @@ kidsLocationGet( int number, int kidsId ) async {
         Uri.encodeFull(url),
         headers: headers,
         body: jsonEncode(data)
-    );
+        );
 
-      result = json.decode(response.body)['data'][0];
-      
+      result = json.decode(response.body)['ldata'][0];
     }
-
     catch (e) { print(e); }
 
     return result;
@@ -91,7 +88,7 @@ kidsLocationGet( int number, int kidsId ) async {
         body: jsonEncode(data)
     );
 
-      result = json.decode(response.body)['data'][0];
+      result = json.decode(response.body)['pdata'];
       DB.instance.insertKidsPolygon(result); // 내부 DB에 kids polygon 저장.
     }
 

@@ -16,10 +16,10 @@ class _DBpageState extends State<DBpage> {
     return Scaffold(
       appBar: AppBar( title: Text('디비 목록 결과') ),
       // body: FutureBuilder<List<Parents>>(
-      // body: FutureBuilder<List<ParentsKids>>(
+//       body: FutureBuilder<List<ParentsKids>>(
       body: FutureBuilder<List<KidsPolygon>>(
         // future: DB.instance.getParents(),
-        // future: DB.instance.getParentsKids(),
+//         future: DB.instance.getParentsKids(),
         future: DB.instance.getKidsPolygon(),
         builder: (context, snapshot) {
           if( snapshot.hasData ) {
@@ -28,10 +28,11 @@ class _DBpageState extends State<DBpage> {
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
                   // title: Text( snapshot.data[index].parentsId.toString() ),
-                  title: Text( snapshot.data[index].kidsId.toString() ),
+                    title: Text( snapshot.data[index].polygon.toString() ),
+//                  title: Text( snapshot.data[index].kidsId.toString() ),
                   // subtitle: Text( snapshot.data[index].key.toString() ),
                   // subtitle: Text( snapshot.data[index].name.toString() ),
-                  subtitle: Text( snapshot.data[index].polygon ),
+//                  subtitle: Text( snapshot.data[index].parentsId.toString() ),
                   trailing: 
                     IconButton(
                       alignment: Alignment.center,

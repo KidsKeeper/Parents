@@ -15,10 +15,7 @@ class _MapPageState extends State<MapPage> {
 
   Set<Marker> _markers = {};
   Set<Polyline> polylines = {};
-
   List<LatLng> points =[];
-  List<dynamic> tempList = [];
-  // List<dynamic> timeList = [];
   List<BitmapDescriptor> locationIcon = List<BitmapDescriptor>(3); // 현재 위치 표시하는 icon list
 
   BorderRadiusGeometry radius = BorderRadius.only(
@@ -29,38 +26,17 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     Map<String, dynamic> data = ModalRoute.of(context).settings.arguments;
-
-    _markers.add(Marker(
-      markerId: MarkerId( _markers.length.toString() ),
-      position: LatLng( data['lat'], data['lon'] ),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-    ));
-
-    // print(data);
-    // tempList.add(data['polygon']);
-    // timeList.add(data['date']);
-
-    // for(int i=0; i<tempList[0].length; i++) {
-    //   points.add(LatLng(tempList[0][i][0], tempList[0][i][1]));
-    // }
-
-    // markers.add(Marker(
-    //   markerId: MarkerId(markers.length.toString()),
-    //   position: LatLng(data['start'][0],data['start'][1]),
-    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-    // ));
-
-    // markers.add(Marker(
-    //   markerId: MarkerId(markers.length.toString()),
-    //   position: LatLng(data['end'][0],data['end'][1]),
-    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-    // ));
-
-    // polylines.add(Polyline(
-    //   polylineId: PolylineId(polylines.length.toString()),
-    //   points:points,
-    //   color:Colors.blue,
-    // ));
+    print(data);
+    if(data==null){
+      print("ThirdPage: 아이 현재 위치 없지롱.");
+      //snackbar 하거나 3초 정도의 alert 박스를 넣는것이 좋을 것 같다고 생각함.
+    }else{
+      _markers.add(Marker(
+        markerId: MarkerId( _markers.length.toString() ),
+        position: LatLng( data['lat'], data['lon'] ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      ));
+    }
 
     return Scaffold(
       body: Stack(
@@ -111,7 +87,7 @@ class _MapPageState extends State<MapPage> {
                     children: <Widget>[
                       Column(
                         children: <Widget>[
-                          Text( snapshot.data[index].date, style: TextStyle(fontFamily: 'BMJUA') )
+                          Text( snapshot.data[index].date+'\n', style: TextStyle(fontFamily: 'BMJUA') )
                         ],
                       ),
                       SizedBox( width: 20 ),
@@ -129,60 +105,30 @@ class _MapPageState extends State<MapPage> {
                     ],
                   ),
                 ),
-                onTap: () { print( snapshot.data[index] ); }
+                onTap: () {
+                  //print( snapshot.data[index].polygon );
+                  polylines.clear();
+                  points.clear();
+                  List<String> a = snapshot.data[index].polygon.split(',');
+                  for(int i=0; i<(a.length)/2; i=i+2){
+                    points.add(LatLng(double.parse(a[i]),double.parse(a[i+1])));
+                  }
+
+                  polylines.add(Polyline(
+                    polylineId: PolylineId(polylines.length.toString()),
+                    points: points,
+                    color: Colors.blue,
+                  ));
+                  setState(() {});
+                }
               );
             },
           );
         }
+        else{
+          return Text("nodata");
+        }
       }
     );
-
-    // return ListView.separated(
-    //   separatorBuilder: (context, index) => Divider(
-    //     height: 10.0,
-    //     color: Color(0xfff3b92b),
-    //   ),
-    //   controller: sc,
-    //   itemCount: tempList.length,
-    //   itemBuilder: (BuildContext context, int i){
-    //     return GestureDetector(
-    //       child: Container(
-    //         child: Row(
-    //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //           children: <Widget>[
-    //             Column(
-    //               children: <Widget>[
-    //                 Text(timeList[i],style: TextStyle(fontFamily: 'BMJUA'),),
-    //               ],
-    //             ),
-    //             SizedBox(width: 20,),
-    //             Container(
-    //               decoration: BoxDecoration(
-    //                 borderRadius: BorderRadius.all(Radius.circular(10)),
-    //                 border: Border.all(
-    //                   color: Color(0xfff3b92b),
-    //                   width: 2.0,
-    //                 ),
-    //                 color: Colors.white,
-    //               ),
-    //               child: IconButton(icon:Icon(Icons.room,color: Color(0xfff3b92b),), onPressed: () {} ),
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //       onTap: (){
-    //         print(tempList[i]); // 이 좌표가 있는곳으로 지도 이동까지 만드는 것 해야함.
-    //       },
-    //     );
-    //   },
-    // );
   }
-
 }
-
-//_getParentsKidsId( int index ) async {
-//  int kidsId = -1;
-//  try { kidsId = await DB.instance.getParentsKidsId(index); }
-//  catch(e) { print(e); }
-//  return kidsId;
-//}
