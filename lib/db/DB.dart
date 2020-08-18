@@ -12,7 +12,7 @@ import '../Server.dart';
 class DB {
   DB._();
 
-  static const _databaseName = 'kikaae_parents.db';
+  static const _databaseName = 'ss.db';
 
   static final DB instance = DB._();
 
@@ -134,6 +134,8 @@ class DB {
         List<dynamic> start = data[i]['start'];
         List<dynamic> end = data[i]['end'];
         List<dynamic> polygon = data[i]['polygon'];
+        String source = data[i]['source'];
+        String destination = data[i]['destination'];
 
         String startString = start[0].toString() + ',' + start[1].toString();
         String endString = end[0].toString() + ',' + end[1].toString();
@@ -150,6 +152,8 @@ class DB {
             start: startString,
             end: endString,
             polygon: polygonString,
+            source: source,
+            destination: destination,
             date: data[i]['date']
         );
 

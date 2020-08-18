@@ -12,7 +12,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   Completer<GoogleMapController> _mapController = Completer();
-
+  PanelController panelController = PanelController();
   Set<Marker> _markers = {};
   Set<Polyline> polylines = {};
   List<LatLng> points =[];
@@ -58,6 +58,7 @@ class _MapPageState extends State<MapPage> {
             color: Color(0xfffefad1),
             borderRadius: radius,
             panelBuilder: (ScrollController sc) => _scrollingList(sc, context),
+            controller: panelController,
           ),
         ],
       ),
@@ -87,7 +88,8 @@ class _MapPageState extends State<MapPage> {
                     children: <Widget>[
                       Column(
                         children: <Widget>[
-                          Text( snapshot.data[index].date+'\n', style: TextStyle(fontFamily: 'BMJUA') )
+                          Text( snapshot.data[index].date, style: TextStyle(fontFamily: 'BMJUA') ),
+                          Text( snapshot.data[index].source + "->" +snapshot.data[index].destination, style: TextStyle(fontFamily: 'BMJUA') )//snapshot.data[index].destination
                         ],
                       ),
                       SizedBox( width: 20 ),
@@ -105,7 +107,7 @@ class _MapPageState extends State<MapPage> {
                     ],
                   ),
                 ),
-                onTap: () {
+                onTap: () async{
                   //print( snapshot.data[index].polygon );
                   polylines.clear();
                   points.clear();
@@ -119,6 +121,12 @@ class _MapPageState extends State<MapPage> {
                     points: points,
                     color: Colors.blue,
                   ));
+                  final GoogleMapController controller = await _mapController.future;
+                  controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+                    target: LatLng(points[0].latitude,points[0].longitude),
+                    zoom: 16.0,
+                  )));
+                  panelController.close();
                   setState(() {});
                 }
               );
