@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-
 import 'dart:ui';
-
+import '../models/AlertDialog.dart';
 import '../ChildCard.dart';
 import '../db/DB.dart';
 import '../Server.dart';
@@ -129,11 +128,13 @@ class _SecondPageState extends State<SecondPage> {
                                   int result = await DB.instance.insertParentsId( name, key );
                                   print( 'result: ' + result.toString() );
 
-                                  if( result == 1 ) { childList.add(name); setState(() {}); }
-                                  else if( result == 0 ) { print('key is invaild'); } // 재원아! 이 부분에 키 값이 안 맞다고 alert 창 뜨도록 하면 됩니다!
-
-                                  Navigator.pop(context);
-                                }, //todo:확인 누를 시에 db에 아이 이름 추가 내용 넣기 , 현재: 임시로 리스트에만 들어가도록해놨음.
+                                  if( result == 1 ) { childList.add(name); setState(() {}); Navigator.pop(context);}
+                                  else if( result == 0 ) {
+                                    print('SecondPage: key is invaild');
+                                    Navigator.pop(context);
+                                    showMyDialog(context,"코드가 올바르지 않습니다.");
+                                  } // 재원아! 이 부분에 키 값이 안 맞다고 alert 창 뜨도록 하면 됩니다!
+                                },
                                 child: Text(
                                   "확인",
                                   style: TextStyle(color: Colors.white, fontSize: 20,fontFamily: 'BMJUA',),
