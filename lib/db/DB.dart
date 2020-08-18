@@ -24,34 +24,24 @@ class DB {
   }
 
   initDB() async {
-//    KidsPolygon kidspolygon = KidsPolygon(
-//        kidsId: 123,
-//        source: '출발지',
-//        destination: '도착지',
-//        start: '35.23586768188915,129.08387632919369',
-//        end: '35.231184894519025,129.08500135999316',
-//        polygon: '35.23586768188915,129.08387632919369,35.23584268469249,129.0838763298809835.23554827326511,129.0838763379761,35.23538995737773,129.08385967711354,35.235284413504196,129.08385134740774,35.23471225539525,129.0838485856034,35.23451505189494,129.0836652736541,35.23410397958244,129.0832708748543,35.23400954906967,129.0834514172858,35.23372903391805,129.08393471624987,35.233670708667916,129.08401804393134,35.23363737963776,129.08404859774294,35.23360682802249,129.08407637394225,35.23336520068924,129.0847374341373,35.2333124319654,129.08490686528,35.23309580085223,129.08551515160576,35.232981924168065,129.08548460184142,35.232379210997046,129.08532352132784,35.23162929133988,129.0851207818215,35.23160984851019,129.08509022946066,35.23160151575139,129.08507078693816,35.231348765442874,129.08502357577572,35.23132099103676,129.08503746421894,35.231307103653776,129.08503468706476,35.231184894519025,129.08500135999316',
-//        date: '2020-08-20 09:00:00'
-//    );
-
     return await openDatabase(join(
-        await getDatabasesPath(), _databaseName),
-        version: 1,
-        onCreate: ( Database db, int version ) async {
-          await db.execute( "CREATE TABLE parents (id INTEGER PRIMARY KEY NOT NULL, parentsId INTEGER)" );
-          await db.execute( "CREATE TABLE parentskids (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, name TEXT, key TEXT)" );
-          await db.execute( "CREATE TABLE kidspolygon (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, source TEXT, destination TEXT, polygon TEXT, start TEXT, end TEXT, date TEXT)" );
-//          await db.insert( 'parentskids', kidspolygon.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
-        }
+      await getDatabasesPath(), _databaseName),
+      version: 1,
+      onCreate: ( Database db, int version ) async {
+        await db.execute( "CREATE TABLE parents (id INTEGER PRIMARY KEY NOT NULL, parentsId INTEGER)" );
+        await db.execute( "CREATE TABLE parentskids (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, name TEXT, key TEXT)" );
+        await db.execute( "CREATE TABLE kidspolygon (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , kidsId INTEGER, source TEXT, destination TEXT, polygon TEXT, start TEXT, end TEXT, date TEXT)" );
+      }
     );
   }
 
-  insertParentsId( String name, String key ) async {
+  Future<int> insertParentsId( String name, String key ) async {
     final Database db = await database;
     var parentsId = await getParentsId(); // parentsId가 있는지 확인
 
     if( parentsId != -1 ) {
-      _insertParentsKey( db, parentsId, name, key ); // 전에 parentsId 생성했더라면
+      int result = await _insertParentsKey( db, parentsId, name, key ); // 전에 parentsId 생성했더라면
+      return result;
     }
 
     else { // 처음으로 parentsId를 생성하는거라면
@@ -65,11 +55,13 @@ class DB {
       );
 
       await db.insert( 'parents', parents.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
-      _insertParentsKey( db, parentsId, name, key );
+      int result = await _insertParentsKey( db, parentsId, name, key );
+
+      return result;
     }
   }
 
-  _insertParentsKey( db, parentsId, String name, String key ) async {
+  Future<int> _insertParentsKey( db, parentsId, String name, String key ) async {
     try {
       var data = json.decode( await parentsKeyConfirm( parentsId, name, key ) );
 
@@ -87,15 +79,17 @@ class DB {
         int length = maps.length;
 
         for( var i = 0; i < length; i++ ) // to avoid duplication of parentskids
-          if( data['kidsId'] == maps[i]['kidsId'] ) return;
+          if( data['kidsId'] == maps[i]['kidsId'] ) { print('kidsId duplicated!'); return 0; }
 
         await db.insert( 'parentskids', parentsKids.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
+
+        return 1;
       }
 
-      else { print(result); } // 키 값이 맞지 않다면(0을 출력)
+      else { print(result); return 0; } // 키 값이 맞지 않다면(0을 출력 + 반환)
     }
 
-    catch (e) { print(e); }
+    catch (e) { print(e); return 0; } // 에러 떠도 0 반환
   }
 
   getParentsId()  async {
@@ -114,8 +108,8 @@ class DB {
 
   Future<List<KidsPolygon>> getKidsPolygon() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('kidspolygon');
-
+    final List<Map<String, dynamic>> maps = await db.query( 'kidspolygon', orderBy: 'id DESC' );
+   
     return List.generate(maps.length, (i) {
       return KidsPolygon(
           id: maps[i]['id'],
@@ -131,7 +125,6 @@ class DB {
 
   Future<void> insertKidsPolygon( List<dynamic> data) async {
     final Database db = await database;
-    print(data);
 
     try {
       int length = data.length;
