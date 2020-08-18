@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import '../Server.dart';
 import '../db/DB.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
@@ -28,34 +29,50 @@ class _MapPageState extends State<MapPage> {
     topRight: Radius.circular(24.0),
   );
 
+
   // cctv
   List<LatLng> cctvLocation = [];
   bool visableCCTV = false;
   Image cctvButtonImage;
   BitmapDescriptor cctvMarkerImage;
-
+  BitmapDescriptor kidLocationMarkerImage;
   @override
   void initState() {
     super.initState();
     getCCTV();
     cctvButtonImage = Image.asset('image/CCTVButton.png');
     getBytesFromAsset('image/CCTV.png', 70).then((BitmapDescriptor value) => cctvMarkerImage = value);
+    getBytesFromAsset('image/kidLocation.png', 80).then((BitmapDescriptor value) => kidLocationMarkerImage = value);
   }
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> data = ModalRoute.of(context).settings.arguments;
-    print(data);
-    if(data==null){
-      print("ThirdPage: 아이 현재 위치 없지롱.");
-      //snackbar 하거나 3초 정도의 alert 박스를 넣는것이 좋을 것 같다고 생각함.
-    }else{
-      _markers.add(Marker(
-        markerId: MarkerId( _markers.length.toString() ),
-        position: LatLng( data['lat'], data['lon'] ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-      ));
-    }
+    int kidsId = ModalRoute.of(context).settings.arguments;
+    Map<String, dynamic> data;
+    Timer.periodic(Duration(seconds : 3), (Timer t) async {
+      data =await kidsLocationGet( 0, kidsId );
+      try{
+        if(data['status'] == false )
+          t.cancel();
+        else{
+          if(data==null){
+            print("ThirdPage: 아이 현재 위치 없지롱."); //snackbar 하거나 3초 정도의 alert 박스를 넣는것이 좋을 것 같다고 생각함.
+          }
+          else{
+            _markers.removeWhere( (m) => m.markerId.value == 'kidslocation');
+            _markers.add(Marker(
+              markerId: MarkerId('kidslocation'),
+              position: LatLng( data['lat'], data['lon'] ),
+              icon: kidLocationMarkerImage,
+          ));
+          setState(() {       });
+          }     
+        }
+      }
+      catch(e){
+
+      }
+    });
 
     return Scaffold(
       body: Stack(

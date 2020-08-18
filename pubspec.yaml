@@ -38,6 +38,7 @@ flutter:
     - image/KIKI.png
     - image/CCTV.png
     - image/CCTVButton.png
+    - image/kidLocation.png
   fonts:
     - family: BMJUA
       fonts:
