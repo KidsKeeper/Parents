@@ -35,12 +35,13 @@ class DB {
     );
   }
 
-  insertParentsId( String name, String key ) async {
+  Future<int> insertParentsId( String name, String key ) async {
     final Database db = await database;
     var parentsId = await getParentsId(); // parentsId가 있는지 확인
 
     if( parentsId != -1 ) {
-      _insertParentsKey( db, parentsId, name, key ); // 전에 parentsId 생성했더라면
+      int result = await _insertParentsKey( db, parentsId, name, key ); // 전에 parentsId 생성했더라면
+      return result;
     }
 
     else { // 처음으로 parentsId를 생성하는거라면
@@ -54,11 +55,13 @@ class DB {
       );
 
       await db.insert( 'parents', parents.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
-      _insertParentsKey( db, parentsId, name, key );
+      int result = await _insertParentsKey( db, parentsId, name, key );
+
+      return result;
     }
   }
 
-  _insertParentsKey( db, parentsId, String name, String key ) async {
+  Future<int> _insertParentsKey( db, parentsId, String name, String key ) async {
     try {
       var data = json.decode( await parentsKeyConfirm( parentsId, name, key ) );
 
@@ -76,15 +79,17 @@ class DB {
         int length = maps.length;
 
         for( var i = 0; i < length; i++ ) // to avoid duplication of parentskids
-          if( data['kidsId'] == maps[i]['kidsId'] ) return;
+          if( data['kidsId'] == maps[i]['kidsId'] ) { print('kidsId duplicated!'); return 0; }
 
         await db.insert( 'parentskids', parentsKids.toMap(), conflictAlgorithm: ConflictAlgorithm.replace );
+
+        return 1;
       }
 
-      else { print(result); } // 키 값이 맞지 않다면(0을 출력)
+      else { print(result); return 0; } // 키 값이 맞지 않다면(0을 출력 + 반환)
     }
 
-    catch (e) { print(e); }
+    catch (e) { print(e); return 0; } // 에러 떠도 0 반환
   }
 
   getParentsId()  async {

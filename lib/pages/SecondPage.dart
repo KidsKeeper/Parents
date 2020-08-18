@@ -8,7 +8,6 @@ import '../db/DB.dart';
 import '../Server.dart';
 import './DBpage.dart';
 import 'ThirdPage.dart';
-// import './ThirdPage.dart';
 
 class SecondPage extends StatefulWidget {
   @override
@@ -122,15 +121,17 @@ class _SecondPageState extends State<SecondPage> {
                               DialogButton(
                                 color: Colors.orange,
                                 radius: BorderRadius.circular(10),
-                                onPressed: ()
+                                onPressed: () async
                                 {
                                   String name = nameController.text;
                                   String key = keyController.text;
 
-                                  DB.instance.insertParentsId( name, key );
+                                  int result = await DB.instance.insertParentsId( name, key );
+                                  print( 'result: ' + result.toString() );
 
-                                  childList.add(name);
-                                  setState(() {});
+                                  if( result == 1 ) { childList.add(name); setState(() {}); }
+                                  else if( result == 0 ) { print('key is invaild'); } // 재원아! 이 부분에 키 값이 안 맞다고 alert 창 뜨도록 하면 됩니다!
+
                                   Navigator.pop(context);
                                 }, //todo:확인 누를 시에 db에 아이 이름 추가 내용 넣기 , 현재: 임시로 리스트에만 들어가도록해놨음.
                                 child: Text(

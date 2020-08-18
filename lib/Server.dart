@@ -55,7 +55,7 @@ parentsKeyConfirm( parentsId, String name, String key ) async {
 
 kidsLocationGet( int number, int kidsId ) async {
   var result;
-  int parentsId = DB.instance.getParentsId();
+  int parentsId = await DB.instance.getParentsId();
 
   Map data = { 'kidsId': kidsId, 'parentsId': parentsId };
 
