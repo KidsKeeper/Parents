@@ -108,7 +108,7 @@ class DB {
 
   Future<List<KidsPolygon>> getKidsPolygon() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('kidspolygon');
+    final List<Map<String, dynamic>> maps = await db.query( 'kidspolygon', orderBy: 'id DESC' );
    
     return List.generate(maps.length, (i) {
       return KidsPolygon(

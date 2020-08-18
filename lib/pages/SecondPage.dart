@@ -148,7 +148,7 @@ class _SecondPageState extends State<SecondPage> {
                       child: Container(
                         width: 120,
                         padding: EdgeInsets.all(15),
-                        child: Text('선택',style: TextStyle(color: Colors.white,fontFamily: 'BMJUA',fontSize: 20),textAlign: TextAlign.center,),
+                        child: Text('삭제',style: TextStyle(color: Colors.white,fontFamily: 'BMJUA',fontSize: 20),textAlign: TextAlign.center,),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(15.0)),
                           color: Colors.orange,
