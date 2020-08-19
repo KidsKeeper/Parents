@@ -95,6 +95,7 @@ class _MapPageState extends State<MapPage> {
             },
           ),
           SlidingUpPanel(
+            minHeight: 110,
             color: Color(0xfffefad1),
             borderRadius: radius,
             panelBuilder: (ScrollController sc) => _scrollingList(sc, context),
@@ -158,30 +159,55 @@ class _MapPageState extends State<MapPage> {
             itemCount: snapshot.data.length,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
-                child: Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Text( snapshot.data[index].date, style: TextStyle(fontFamily: 'BMJUA') ),
-                          Text( snapshot.data[index].source + "->" +snapshot.data[index].destination, style: TextStyle(fontFamily: 'BMJUA') )//snapshot.data[index].destination
-                        ],
-                      ),
-                      SizedBox( width: 20 ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all( Radius.circular(10) ),
-                          border: Border.all(
-                            color: Color(0xfff3b92b),
-                            width: 2.0,
-                          ),
-                          color: Colors.white,
+                child:Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text( "      "+snapshot.data[index].date, style: TextStyle(fontFamily: 'BMJUA',color: Color(0xffe09a4f),fontWeight: FontWeight.bold)),
+                    SizedBox(height: 7,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            SizedBox(width: 15,),
+                            Column(
+                              children: <Widget>[
+                                Icon(Icons.account_circle,color: Color(0xfff3b92b),size: 10,),
+                                Icon(Icons.more_vert,color: Color(0xfff3b92b),),
+                                Icon(Icons.room,color: Color(0xfff3b92b),size: 10,),
+                              ],
+                            ),
+                            SizedBox(width: 10,),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text( snapshot.data[index].source , style: TextStyle(fontFamily: 'BMJUA',color: Colors.black54) ),
+                                SizedBox(height: 15,),
+                                Text( snapshot.data[index].destination, style: TextStyle(fontFamily: 'BMJUA',color: Colors.black54)),
+                              ],
+                            ),
+                          ],
                         ),
-                        child: IconButton( icon: Icon(Icons.room, color: Color(0xfff3b92b), ), onPressed: () {} ),
-                      ),
-                    ],
-                  ),
+                        Row(
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all( Radius.circular(15) ),
+                                border: Border.all(
+                                  color: Color(0xfff3b92b),
+                                  width: 2.0,
+                                ),
+                                color: Colors.white,
+                              ),
+                              child: Icon(Icons.room, color: Color(0xfff3b92b), size: 35,),
+                            ),
+                            SizedBox(width: 15,)
+                          ],
+                        ),
+                      ],
+                    )
+                  ],
                 ),
                 onTap: () async{
                   //print( snapshot.data[index].polygon );
