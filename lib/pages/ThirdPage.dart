@@ -188,7 +188,7 @@ class _MapPageState extends State<MapPage> {
                   polylines.clear();
                   points.clear();
                   List<String> a = snapshot.data[index].polygon.split(',');
-                  for(int i=0; i<(a.length)/2; i=i+2){
+                  for(int i=0; i<(a.length+1)/2; i=i+2){
                     points.add(LatLng(double.parse(a[i]),double.parse(a[i+1])));
                   }
 
@@ -200,7 +200,7 @@ class _MapPageState extends State<MapPage> {
                   final GoogleMapController controller = await _mapController.future;
                   controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
                     target: LatLng(points[0].latitude,points[0].longitude),
-                    zoom: 16.0,
+                    zoom: 16.9,
                   )));
                   panelController.close();
                   setState(() {});
