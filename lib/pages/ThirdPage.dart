@@ -12,8 +12,10 @@ import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 
 class MapPage extends StatefulWidget {
+  int kidsId = 0;
+  MapPage(this.kidsId);
   @override
-  _MapPageState createState() => _MapPageState();
+  _MapPageState createState() => _MapPageState(kidsId);
 }
 
 class _MapPageState extends State<MapPage> {
@@ -23,7 +25,8 @@ class _MapPageState extends State<MapPage> {
   Set<Polyline> polylines = {};
   List<LatLng> points =[];
   List<BitmapDescriptor> locationIcon = List<BitmapDescriptor>(3); // 현재 위치 표시하는 icon list
-
+  int kidsId = 0;
+  Timer timer;
   BorderRadiusGeometry radius = BorderRadius.only(
     topLeft: Radius.circular(24.0),
     topRight: Radius.circular(24.0),
@@ -36,6 +39,9 @@ class _MapPageState extends State<MapPage> {
   Image cctvButtonImage;
   BitmapDescriptor cctvMarkerImage;
   BitmapDescriptor kidLocationMarkerImage;
+
+  _MapPageState(this.kidsId);
+
   @override
   void initState() {
     super.initState();
@@ -43,37 +49,35 @@ class _MapPageState extends State<MapPage> {
     cctvButtonImage = Image.asset('image/CCTVButton.png');
     getBytesFromAsset('image/CCTV.png', 70).then((BitmapDescriptor value) => cctvMarkerImage = value);
     getBytesFromAsset('image/kidLocation.png', 80).then((BitmapDescriptor value) => kidLocationMarkerImage = value);
+
+    Map<String, dynamic> data;
+    timer = Timer.periodic(Duration(seconds : 3), (Timer t) async {
+      data = await kidsLocationGet( 0, kidsId );
+        try{
+          if(data['status'] == false )
+            t.cancel();
+          else{
+            if(data==null){
+                print("ThirdPage: 아이 현재 위치 없지롱."); //snackbar 하거나 3초 정도의 alert 박스를 넣는것이 좋을 것 같다고 생각함.
+            }
+            else{
+              _markers.removeWhere( (m) => m.markerId.value == 'kidslocation');
+              _markers.add(Marker(
+                markerId: MarkerId('kidslocation'),
+                position: LatLng( data['lat'], data['lon'] ),
+                icon: kidLocationMarkerImage,
+              ));
+              setState(() {       });
+              }     
+            }
+          }
+          catch(e){}
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    int kidsId = ModalRoute.of(context).settings.arguments;
-    Map<String, dynamic> data;
-    Timer.periodic(Duration(seconds : 3), (Timer t) async {
-      data =await kidsLocationGet( 0, kidsId );
-      try{
-        if(data['status'] == false )
-          t.cancel();
-        else{
-          if(data==null){
-            print("ThirdPage: 아이 현재 위치 없지롱."); //snackbar 하거나 3초 정도의 alert 박스를 넣는것이 좋을 것 같다고 생각함.
-          }
-          else{
-            _markers.removeWhere( (m) => m.markerId.value == 'kidslocation');
-            _markers.add(Marker(
-              markerId: MarkerId('kidslocation'),
-              position: LatLng( data['lat'], data['lon'] ),
-              icon: kidLocationMarkerImage,
-          ));
-          setState(() {       });
-          }     
-        }
-      }
-      catch(e){
-
-      }
-    });
-
+    //int kidsId = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -129,6 +133,12 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    timer.cancel();
   }
 
 

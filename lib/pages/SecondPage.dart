@@ -175,7 +175,8 @@ class _SecondPageState extends State<SecondPage> {
                     await kidsLocationGet( 1, kidsId );
 //                    print(nowLocation['polygon']); //
                     print("SecondPage: onTap linstend!");
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(), settings: RouteSettings(arguments: kidsId)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(kidsId) ));
+                    //Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(kidsId), settings: RouteSettings(arguments: kidsId)));  
                   },
                 ),
               ),
