@@ -94,13 +94,6 @@ class _MapPageState extends State<MapPage> {
               _mapController.complete(controller);
             },
           ),
-          SlidingUpPanel(
-            minHeight: 110,
-            color: Color(0xfffefad1),
-            borderRadius: radius,
-            panelBuilder: (ScrollController sc) => _scrollingList(sc, context),
-            controller: panelController,
-          ),
           Container(
             alignment: Alignment.bottomRight,
             width : MediaQuery.of(context).size.width * 0.95,
@@ -130,7 +123,14 @@ class _MapPageState extends State<MapPage> {
                 ),
               ],
             ),
-          )
+          ),
+          SlidingUpPanel(
+            minHeight: 110,
+            color: Color(0xfffefad1),
+            borderRadius: radius,
+            panelBuilder: (ScrollController sc) => _scrollingList(sc, context),
+            controller: panelController,
+          ),
         ],
       ),
     );
