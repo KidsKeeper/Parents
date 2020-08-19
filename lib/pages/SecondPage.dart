@@ -47,6 +47,7 @@ class _SecondPageState extends State<SecondPage> {
                 Image.asset('image/KIKI.png',height: 57,),
               ],
             ),
+            SizedBox(height: 25,),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -164,6 +165,7 @@ class _SecondPageState extends State<SecondPage> {
                 ),
               ],
             ),
+            SizedBox(height: 5,),
             Container(
               height: 270 ,
               child: ListView.builder(
