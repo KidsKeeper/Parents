@@ -1,7 +1,7 @@
 
 # KidsKeeper for Parents
 
-> 키즈키퍼는 부모님과 연동가능한 아이들을 위한 , 위험한 경로를 피해서 안전한 길찾기를 도와주는   어플리케이션 입니다.<br>🐥[KidsKeeper for Kids](https://github.com/KidsKeeper/KiKee)🐣
+> 키즈키퍼는 부모님과 연동가능한 아이들을 위한 , <br>위험한 경로를 피해서 안전한 길찾기를 도와주는   어플리케이션 입니다.<br>🐥[KidsKeeper for Kids](https://github.com/KidsKeeper/KiKee)🐣
 <div>
 <img src = "https://drive.google.com/uc?export=view&id=16Bemod5YWD-btu9uLyF4FoMk2yIJ04d9" width = "80%">
 </div>
