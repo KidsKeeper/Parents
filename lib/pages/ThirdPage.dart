@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import '../Server.dart';
-import '../db/DB.dart';
 import 'package:http/http.dart' as http;
-import 'dart:ui' as ui;
+
+import '../src/Server.dart';
+import '../db/KikeeDB.dart';
 
 class MapPage extends StatefulWidget {
   int kidsId = 0;
@@ -146,7 +148,7 @@ class _MapPageState extends State<MapPage> {
   Widget _scrollingList(ScrollController sc, context) {
 
     return FutureBuilder(
-      future: DB.instance.getKidsPolygon(),
+      future: KikeeDB.instance.getKidsPolygon(),
       // ignore: missing_return
       builder: (context, snapshot) {
         if( snapshot.hasData ) {
