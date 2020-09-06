@@ -1,247 +1,261 @@
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:async';
+import 'dart:ui' as ui;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
-import 'dart:ui';
+import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:http/http.dart' as http;
 
-import '../src/AlertDialog.dart';
-import '../src/ChildCard.dart';
 import '../src/Server.dart';
-import '../models/ParentsKids.dart';
 import '../db/KikeeDB.dart';
-import './ThirdPage.dart';
 
-class SecondPage extends StatefulWidget {
+class MapPage extends StatefulWidget {
+  int kidsId = 0;
+  MapPage(this.kidsId);
   @override
-  _SecondPageState createState() => _SecondPageState();
+  _MapPageState createState() => _MapPageState(kidsId);
 }
 
-class _SecondPageState extends State<SecondPage> {
-  TextEditingController nameController = new TextEditingController();
-  TextEditingController keyController = new TextEditingController();
+class _MapPageState extends State<MapPage> {
+  Completer<GoogleMapController> _mapController = Completer();
+  PanelController panelController = PanelController();
+  Set<Marker> _markers = {};
+  Set<Polyline> polylines = {};
+  List<LatLng> points =[];
+  List<BitmapDescriptor> locationIcon = List<BitmapDescriptor>(3); // 현재 위치 표시하는 icon list
+  int kidsId = 0;
+  Timer timer;
+  BorderRadiusGeometry radius = BorderRadius.only(
+    topLeft: Radius.circular(24.0),
+    topRight: Radius.circular(24.0),
+  );
 
-  List<String> childList;
 
-  void _getNameList() async {
-    List<String> nameList = await KikeeDB.instance.getParentsKidsName();
-    childList = nameList;
-    setState(() {});
-  }
+  // cctv
+  List<LatLng> cctvLocation = [];
+  bool visableCCTV = false;
+  Image cctvButtonImage;
+  BitmapDescriptor cctvMarkerImage;
+  BitmapDescriptor kidLocationMarkerImage;
 
-  initState() {
+  _MapPageState(this.kidsId);
+
+  @override
+  void initState() {
     super.initState();
-    _getNameList();
-  }
+    getCCTV();
+    cctvButtonImage = Image.asset('image/CCTVButton.png');
+    getBytesFromAsset('image/CCTV.png', 70).then((BitmapDescriptor value) => cctvMarkerImage = value);
+    getBytesFromAsset('image/kidLocation.png', 80).then((BitmapDescriptor value) => kidLocationMarkerImage = value);
 
-  int selectIdx = 0;
+    Map<String, dynamic> data;
+    timer = Timer.periodic(Duration(seconds : 3), (Timer t) async {
+      data = await kidsLocationGet( 0, kidsId );
+        try{
+          if(data['status'] == false )
+            t.cancel();
+          else{
+            if(data==null){
+                print("SecondPage: 아이 현재 위치 없지롱."); //snackbar 하거나 3초 정도의 alert 박스를 넣는것이 좋을 것 같다고 생각함.
+            }
+            else{
+              _markers.removeWhere( (m) => m.markerId.value == 'kidslocation');
+              _markers.add(Marker(
+                markerId: MarkerId('kidslocation'),
+                position: LatLng( data['lat'], data['lon'] ),
+                icon: kidLocationMarkerImage,
+              ));
+              setState(() {       });
+              }     
+            }
+          }
+          catch(e){}
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    //int kidsId = ModalRoute.of(context).settings.arguments;
     return Scaffold(
-      backgroundColor:  Color(0xfffcefa3),
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('KIKEE',style: TextStyle(fontFamily: 'BMJUA',fontSize: 70,color: Colors.orange) ,),
-                Image.asset('image/KIKI.png',height: 57,),
-              ],
+      body: Stack(
+        children: <Widget>[
+          GoogleMap(
+            mapType: MapType.normal,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(35.229647, 129.089208),
+              zoom: 15.0,
             ),
-            SizedBox(height: 25,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    GestureDetector(
-                      child: Container(
-                        width: 120,
-                        padding: EdgeInsets.all(15),
-                        child: Text('추가',style: TextStyle(color: Colors.white,fontFamily: 'BMJUA',fontSize: 20),textAlign: TextAlign.center,),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                            color: Colors.grey,
-                            ),
-                      ),
-                      onTap: ()
-                      {
-                        Alert(
-                            context: context,
-                            title: "자녀 추가",
-                            style: AlertStyle(
-                              titleStyle: TextStyle(fontFamily: 'BMJUA',fontSize: 30,color: Colors.orange),
-                              alertBorder:  RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                                side: BorderSide(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                        ),
-                            content: Column(
-                              children: <Widget>[
-                                SizedBox(height: 30,),
-                                CircleAvatar(
-                                  radius: 70,
-                                  backgroundColor: Color(0xfffff3e3),
-                                  child: Icon(Icons.person,color: Color(0xffffcf91),size: 120,),
-                                ),
-                                SizedBox(height: 20,),
-                                Material(
-                                  elevation: 5.0,
-                                  color: Colors.white,
-                                  shadowColor: Color(0xffe0e0e0),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(15.0))),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(10),
-                                    child: Column(
-                                      children: <Widget> [
-                                      TextField(
-                                        controller: nameController, //입력받는 controller
-                                        style: TextStyle(color: Color(0xfff0ae75), fontSize: 18,fontFamily: 'BMJUA',),
-                                        decoration: InputDecoration(
-                                            border: InputBorder.none,
-                                            hintText: " 자녀의 이름을 입력해 주세요",
-                                            hintStyle: TextStyle(color: Color(0xfff0ae75), fontSize: 18,fontFamily: 'BMJUA',)),
-                                      ),
-                                      TextField(
-                                        controller: keyController, //입력받는 controller
-                                        style: TextStyle(color: Color(0xfff0ae75), fontSize: 18,fontFamily: 'BMJUA',),
-                                        decoration: InputDecoration(
-                                            border: InputBorder.none,
-                                            hintText: " 키를 입력해 주세요",
-                                            hintStyle: TextStyle(color: Color(0xfff0ae75), fontSize: 18,fontFamily: 'BMJUA',)),
-                                      ),
-                                    ]),
-                                  ),
-                                )
-                              ],
-                            ),
-                            buttons: [
-                              DialogButton(
-                                color: Colors.orange,
-                                radius: BorderRadius.circular(10),
-                                onPressed: () async
-                                {
-                                  String name = nameController.text;
-                                  String key = keyController.text;
-
-                                  int result = await KikeeDB.instance.insertParentsId( name, key );
-                                  print( 'result: ' + result.toString() );
-
-                                  if( result == 1 ) { childList.add(name); setState(() {}); Navigator.pop(context);}
-                                  else if( result == 0 ) {
-                                    print('SecondPage: key is invaild');
-                                    Navigator.pop(context);
-                                    showMyDialog(context,"코드가 올바르지 않습니다.");
-                                  }
-                                },
-                                child: Text(
-                                  "확인",
-                                  style: TextStyle(color: Colors.white, fontSize: 20,fontFamily: 'BMJUA',),
-                                ),
-                              )
-                            ]).show();
-                      },
-
-                    ),
-                    SizedBox(width: 10),
-                    GestureDetector(
-                      child: Container(
-                        width: 120,
-                        padding: EdgeInsets.all(15),
-                        child: Text('삭제',style: TextStyle(color: Colors.white,fontFamily: 'BMJUA',fontSize: 20),textAlign: TextAlign.center,),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                          color: Colors.orange,
-                        ),
-                      ),
-                      onTap: ()
-                      {
-                        alertKidsDeleteDialog(context, '자녀 목록');
-                      },
-                    ),
-                  ],
+            zoomControlsEnabled: false,
+            markers: _markers,
+            polylines: polylines,
+            onMapCreated: (GoogleMapController controller) {
+              _mapController.complete(controller);
+            },
+          ),
+          SlidingUpPanel(
+            minHeight: 110,
+            color: Color(0xfffefad1),
+            borderRadius: radius,
+            panelBuilder: (ScrollController sc) => _scrollingList(sc, context),
+            controller: panelController,
+          ),
+          Container(
+            alignment: Alignment.bottomRight,
+            width : MediaQuery.of(context).size.width * 0.95,
+            height: MediaQuery.of(context).size.height * 0.7,
+            child : Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  //width : MediaQuery.of(context).size.width * 0.1,
+                  child : FloatingActionButton(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child:cctvButtonImage ),
+                    backgroundColor: Color(0xfffefad1),
+                    onPressed: () async {
+                      if(visableCCTV)
+                        _markers.removeWhere((m) => m.markerId.value.contains('cctvLocation'));
+                      else
+                        for(var iter in cctvLocation)
+                          _markers.add(Marker(
+                          markerId: MarkerId('cctvLocation '+ _markers.length.toString()),
+                          position: iter,
+                          icon: cctvMarkerImage));
+                      visableCCTV = !visableCCTV;
+                      setState(() { });
+                    }),
                 ),
               ],
             ),
-            SizedBox(height: 5,),
-            Container(
-              height: 270 ,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: childList.length, //슬라이드 카드 정보 리스트
-                itemBuilder: (BuildContext context, int index) => GestureDetector(
-                  child: childCard(childList[index]),
-                  onTap: () async {
-                    int kidsId = await KikeeDB.instance.getParentsKidsId(index);
-                    await kidsLocationGet( 1, kidsId );
-                    print("SecondPage: onTap linstend!");
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(kidsId) ));
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
 
-  Future<void> alertKidsDeleteDialog( BuildContext context, String msg ) async {
-    return Alert(
-      context: context,
-      title: msg,
-      content: Container(
-        height: 300.0,
-        width: 300.0,
-        child:
-          FutureBuilder<List<ParentsKids>>(
-            future: KikeeDB.instance.getParentsKids(),
-            builder: (context, snapshot) {
-              if( snapshot.hasData ) {
-                return ListView.builder(
-                  itemCount: snapshot.data.length,
-                  itemBuilder: ( BuildContext context, int index ) {
-                    return ListTile(
-                      title: Text( snapshot.data[index].name, style: TextStyle(fontFamily: 'BMJUA', color: Color(0xffe09a4f), fontWeight: FontWeight.bold, fontSize: 20.0) ),
-                      trailing: IconButton(
-                        alignment: Alignment.center,
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          KikeeDB.instance.deleteParentsKidsId( snapshot.data[index].id );
-                          Navigator.pop(context);
-                          _getNameList();
-                        },
-                      ),
-                    );
-                  },
-                );
-              }
-              else if( snapshot.hasError ) return Text('eror');
-              else return Center( child: CircularProgressIndicator() );
+  @override
+  void dispose(){
+    super.dispose();
+    timer.cancel();
+  }
+
+
+  Widget _scrollingList(ScrollController sc, context) {
+
+    return FutureBuilder(
+      future: KikeeDB.instance.getKidsPolygon(),
+      // ignore: missing_return
+      builder: (context, snapshot) {
+        if( snapshot.hasData ) {
+          return ListView.separated(
+            separatorBuilder: (context, index) => Divider(
+              height: 10.0,
+              color: Color(0xfff3b92b),
+            ),
+            controller: sc,
+            itemCount: snapshot.data.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                child:Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text( "      "+snapshot.data[index].date, style: TextStyle(fontFamily: 'BMJUA',color: Color(0xffe09a4f),fontWeight: FontWeight.bold)),
+                    SizedBox(height: 7,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            SizedBox(width: 15,),
+                            Column(
+                              children: <Widget>[
+                                Icon(Icons.account_circle,color: Color(0xfff3b92b),size: 10,),
+                                Icon(Icons.more_vert,color: Color(0xfff3b92b),),
+                                Icon(Icons.room,color: Color(0xfff3b92b),size: 10,),
+                              ],
+                            ),
+                            SizedBox(width: 10,),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text( snapshot.data[index].source , style: TextStyle(fontFamily: 'BMJUA',color: Colors.black54) ),
+                                SizedBox(height: 15,),
+                                Text( snapshot.data[index].destination, style: TextStyle(fontFamily: 'BMJUA',color: Colors.black54)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all( Radius.circular(15) ),
+                                border: Border.all(
+                                  color: Color(0xfff3b92b),
+                                  width: 2.0,
+                                ),
+                                color: Colors.white,
+                              ),
+                              child: Icon(Icons.room, color: Color(0xfff3b92b), size: 35,),
+                            ),
+                            SizedBox(width: 15,)
+                          ],
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+                onTap: () async{
+                  //print( snapshot.data[index].polygon );
+                  polylines.clear();
+                  points.clear();
+                  List<String> a = snapshot.data[index].polygon.split(',');
+                  for(int i=0; i<(a.length+1)/2; i=i+2){
+                    points.add(LatLng(double.parse(a[i]),double.parse(a[i+1])));
+                  }
+
+                  polylines.add(Polyline(
+                    polylineId: PolylineId(polylines.length.toString()),
+                    points: points,
+                    color: Colors.blue,
+                  ));
+                  final GoogleMapController controller = await _mapController.future;
+                  controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+                    target: LatLng(points[0].latitude,points[0].longitude),
+                    zoom: 16.9,
+                  )));
+                  panelController.close();
+                  setState(() {});
+                }
+              );
             },
-          )
-      ),
-      style: AlertStyle(
-        titleStyle: TextStyle( fontFamily: 'BMJUA',color: Colors.black,fontSize: 20),
-        backgroundColor: Color(0xfffdfbf4),
-        alertBorder: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0),),
-        ),
-      ),
-      buttons: [
-        DialogButton(
-            color: Color(0xfff7b413),
-            radius: BorderRadius.circular(15),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child:
-            Text("확인", style: TextStyle(color: Colors.white, fontSize: 20,fontFamily: 'BMJUA'))
-        ),
-      ],
-      closeFunction: ()=>{} //it's nothing but if you deleted this, errors appear.
-    ).show();
+          );
+        }
+        else{
+          return Text("nodata");
+        }
+      }
+    );
+  }
+
+    Future<BitmapDescriptor> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    Uint8List result = (await fi.image.toByteData(format: ui.ImageByteFormat.png)).buffer.asUint8List();
+    return BitmapDescriptor.fromBytes(result);
+  }
+
+  Future<void> getCCTV() async {
+    http.Response response = await http.get("http://3.34.194.177:8088/secret/api/cctv");
+    Map responseJson = jsonDecode(response.body);
+    for (var iter in responseJson["data"])
+      cctvLocation.add(LatLng(double.parse(iter["lat"]), double.parse(iter["lon"])));
   }
 }

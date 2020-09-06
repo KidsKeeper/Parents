@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './pages/SecondPage.dart';
+import './pages/FirstPage.dart';
 
 void main() => runApp(KidsKeeper());
 
@@ -9,6 +9,6 @@ class KidsKeeper extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-        home : SecondPage());
+        home : FirstPage());
   }
 }
