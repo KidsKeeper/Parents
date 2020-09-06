@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'dart:ui';
-import '../models/AlertDialog.dart';
-import '../ChildCard.dart';
-import '../db/DB.dart';
-import '../Server.dart';
-import './DBpage.dart';
-import 'ThirdPage.dart';
+
+import '../src/AlertDialog.dart';
+import '../src/ChildCard.dart';
+import '../src/Server.dart';
+import '../models/ParentsKids.dart';
+import '../db/KikeeDB.dart';
+import './ThirdPage.dart';
 
 class SecondPage extends StatefulWidget {
   @override
@@ -17,11 +18,11 @@ class _SecondPageState extends State<SecondPage> {
   TextEditingController nameController = new TextEditingController();
   TextEditingController keyController = new TextEditingController();
 
-  List<String> childList = [];
+  List<String> childList;
 
   void _getNameList() async {
-    List<String> nameList = await DB.instance.getParentsKidsName();
-    childList += nameList;
+    List<String> nameList = await KikeeDB.instance.getParentsKidsName();
+    childList = nameList;
     setState(() {});
   }
 
@@ -126,7 +127,7 @@ class _SecondPageState extends State<SecondPage> {
                                   String name = nameController.text;
                                   String key = keyController.text;
 
-                                  int result = await DB.instance.insertParentsId( name, key );
+                                  int result = await KikeeDB.instance.insertParentsId( name, key );
                                   print( 'result: ' + result.toString() );
 
                                   if( result == 1 ) { childList.add(name); setState(() {}); Navigator.pop(context);}
@@ -134,7 +135,7 @@ class _SecondPageState extends State<SecondPage> {
                                     print('SecondPage: key is invaild');
                                     Navigator.pop(context);
                                     showMyDialog(context,"코드가 올바르지 않습니다.");
-                                  } // 재원아! 이 부분에 키 값이 안 맞다고 alert 창 뜨도록 하면 됩니다!
+                                  }
                                 },
                                 child: Text(
                                   "확인",
@@ -158,7 +159,7 @@ class _SecondPageState extends State<SecondPage> {
                       ),
                       onTap: ()
                       {
-                         Navigator.push(context, MaterialPageRoute(builder: (context) => DBpage()));
+                        alertKidsDeleteDialog(context, '자녀 목록');
                       },
                     ),
                   ],
@@ -174,12 +175,10 @@ class _SecondPageState extends State<SecondPage> {
                 itemBuilder: (BuildContext context, int index) => GestureDetector(
                   child: childCard(childList[index]),
                   onTap: () async {
-                    int kidsId = await DB.instance.getParentsKidsId(index);
+                    int kidsId = await KikeeDB.instance.getParentsKidsId(index);
                     await kidsLocationGet( 1, kidsId );
-//                    print(nowLocation['polygon']); //
                     print("SecondPage: onTap linstend!");
                     Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(kidsId) ));
-                    //Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(kidsId), settings: RouteSettings(arguments: kidsId)));  
                   },
                 ),
               ),
@@ -188,5 +187,61 @@ class _SecondPageState extends State<SecondPage> {
         ),
       ),
     );
+  }
+
+  Future<void> alertKidsDeleteDialog( BuildContext context, String msg ) async {
+    return Alert(
+      context: context,
+      title: msg,
+      content: Container(
+        height: 300.0,
+        width: 300.0,
+        child:
+          FutureBuilder<List<ParentsKids>>(
+            future: KikeeDB.instance.getParentsKids(),
+            builder: (context, snapshot) {
+              if( snapshot.hasData ) {
+                return ListView.builder(
+                  itemCount: snapshot.data.length,
+                  itemBuilder: ( BuildContext context, int index ) {
+                    return ListTile(
+                      title: Text( snapshot.data[index].name, style: TextStyle(fontFamily: 'BMJUA', color: Color(0xffe09a4f), fontWeight: FontWeight.bold, fontSize: 20.0) ),
+                      trailing: IconButton(
+                        alignment: Alignment.center,
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          KikeeDB.instance.deleteParentsKidsId( snapshot.data[index].id );
+                          Navigator.pop(context);
+                          _getNameList();
+                        },
+                      ),
+                    );
+                  },
+                );
+              }
+              else if( snapshot.hasError ) return Text('eror');
+              else return Center( child: CircularProgressIndicator() );
+            },
+          )
+      ),
+      style: AlertStyle(
+        titleStyle: TextStyle( fontFamily: 'BMJUA',color: Colors.black,fontSize: 20),
+        backgroundColor: Color(0xfffdfbf4),
+        alertBorder: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0),),
+        ),
+      ),
+      buttons: [
+        DialogButton(
+            color: Color(0xfff7b413),
+            radius: BorderRadius.circular(15),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child:
+            Text("확인", style: TextStyle(color: Colors.white, fontSize: 20,fontFamily: 'BMJUA'))
+        ),
+      ],
+      closeFunction: ()=>{} //it's nothing but if you deleted this, errors appear.
+    ).show();
   }
 }

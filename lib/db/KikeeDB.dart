@@ -6,15 +6,15 @@ import 'dart:convert';
 import '../models/Parents.dart';
 import '../models/ParentsKids.dart';
 import '../models/KidsPolygon.dart';
-import '../Helper.dart';
-import '../Server.dart';
+import '../src/Helper.dart';
+import '../src/Server.dart';
 
-class DB {
-  DB._();
+class KikeeDB {
+  KikeeDB._();
 
   static const _databaseName = 'ss.db';
 
-  static final DB instance = DB._();
+  static final KikeeDB instance = KikeeDB._();
 
   static Database _database;
 

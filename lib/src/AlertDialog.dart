@@ -11,7 +11,6 @@ Future<void> showMyDialog(BuildContext context,String msg) async{
         alertBorder: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0),),
         ),
       ),
-//    content: Text(msg,style:TextStyle( fontFamily: 'BMJUA',color: Colors.black,fontSize: 20)),
       buttons: [
         DialogButton(
             color: Color(0xfff7b413),

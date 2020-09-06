@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 
 import 'dart:convert';
 
-import './db/DB.dart';
+import '../db/KikeeDB.dart';
 
 Map <String, String> headers = {
   'Content-type': 'application/json',
@@ -55,7 +55,7 @@ parentsKeyConfirm( parentsId, String name, String key ) async {
 
 kidsLocationGet( int number, int kidsId ) async {
   var result;
-  var parentsId = await DB.instance.getParentsId();
+  var parentsId = await KikeeDB.instance.getParentsId();
 
   Map data = { 'kidsId': kidsId, 'parentsId': parentsId };
 
@@ -90,7 +90,7 @@ kidsLocationGet( int number, int kidsId ) async {
     );
 
       result = json.decode(response.body)['pdata'];
-      DB.instance.insertKidsPolygon(result); // 내부 DB에 kids polygon 저장.
+      KikeeDB.instance.insertKidsPolygon(result); // 내부 DB에 kids polygon 저장.
     }
 
     catch (e) { print(e); }
